@@ -41,6 +41,14 @@ export const CanvasProvider = ({ children }) => {
     return { context, imageData };
   };
 
+  function isCanvasBlank() {
+    const canvas = canvasRef.current;
+    return !canvas
+      .getContext("2d")
+      .getImageData(0, 0, canvas.width, canvas.height)
+      .data.some((channel) => channel !== 255);
+  }
+
   function resizedataURL(datas, wantedWidth, wantedHeight) {
     // We create an image to receive the Data URI
     return new Promise(function (resolve, reject) {
@@ -104,6 +112,7 @@ export const CanvasProvider = ({ children }) => {
         finishDrawing,
         clearCanvas,
         draw,
+        isCanvasBlank,
         saveData,
       }}
     >

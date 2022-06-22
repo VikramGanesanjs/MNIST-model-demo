@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
-import { Button, Center } from "@mantine/core";
+import React, { useState, useEffect } from "react";
+import { Button, Center, Text } from "@mantine/core";
 import {
   loadLayersModel,
   fill,
@@ -13,7 +13,7 @@ import { useCanvas } from "./CanvasContext";
 import { Canvas } from "./Canvas";
 
 const HomePage = () => {
-  const { clearCanvas, saveData } = useCanvas();
+  const { clearCanvas, saveData, isCanvasBlank } = useCanvas();
   const [prediction, setPrediction] = useState(null);
   const [model, setModel] = useState(null);
 
@@ -23,6 +23,10 @@ const HomePage = () => {
 
   const predictNumber = async () => {
     tidy(async () => {
+      if (isCanvasBlank()) {
+        alert("You have not drawn anything yet!");
+        return;
+      }
       const { imageData } = await saveData();
       let img = browser.fromPixels(imageData, 1);
       img = img.reshape([1, 784]);
@@ -41,6 +45,13 @@ const HomePage = () => {
       pred.print();
       let arr = await pred.array();
       setPrediction(arr[0].indexOf(arr[0].reduce((a, b) => Math.max(a, b))));
+      alert(
+        `I think your number is ${arr[0].indexOf(
+          arr[0].reduce((a, b) => Math.max(a, b))
+        )}`
+      );
+      console.log(prediction);
+      clearCanvas();
       // setPrediction(Array.from(pred).ma
     });
   };
@@ -55,6 +66,7 @@ const HomePage = () => {
 
   useEffect(() => {
     loadModel();
+    clearCanvas();
   }, []);
 
   return (
@@ -63,6 +75,7 @@ const HomePage = () => {
         borderColor: theme.black,
         borderWidth: 50,
         padding: 10,
+        backgroundColor: "#ffffff",
         display: "flex",
         flexDirection: "column",
       })}
@@ -94,9 +107,7 @@ const HomePage = () => {
           <Canvas />
         </div>
         <Center sx={{ height: 400, width: 400, margin: 50 }}>
-          {prediction
-            ? `The number is:${prediction}`
-            : "Draw in the box to guess the number!"}
+          <Text>{"Draw in the box to guess the number!"}</Text>
         </Center>
       </Center>
     </Center>
